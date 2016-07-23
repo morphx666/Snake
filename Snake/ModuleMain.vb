@@ -9,11 +9,22 @@ Partial Module ModuleMain
         Public Property IsNew As Boolean
 
         Public Sub New(x As Integer, y As Integer, l As Integer)
-            Item = New Segment(x, y, Segment.Directions.Same)
-            CreatedOn = TimeSpan.FromTicks(Now.Ticks)
             Level = l
+            Item = New Segment(x, y, Segment.Directions.Same, GetColor())
+            CreatedOn = TimeSpan.FromTicks(Now.Ticks)
             IsNew = True
         End Sub
+
+        Private Function GetColor() As ConsoleColor
+            Select Case Level
+                Case 1 : Return ConsoleColor.Gray
+                Case 2 : Return ConsoleColor.Yellow
+                Case 3 : Return ConsoleColor.Green
+                Case 4 : Return ConsoleColor.Blue
+                Case 5 : Return ConsoleColor.Red
+                Case Else : Return ConsoleColor.Black
+            End Select
+        End Function
 
         Public Function Clone() As FoodItemDef
             Return New FoodItemDef(Item.X, Item.Y, Level)
@@ -28,9 +39,11 @@ Partial Module ModuleMain
     Private eraseSegment As New Queue(Of Segment)
     Private foodItem As FoodItemDef
     Private bonuses As New List(Of FoodItemDef)
+    Private youAreWhatYouEat As Boolean = False
 
     Private foodItemLifeSpan As TimeSpan
     Private showingTimer As Boolean
+    Private expertMode As Boolean
 
     Private score As Integer
     Private lastScore As Integer = -1
@@ -48,19 +61,19 @@ Partial Module ModuleMain
     End Sub
 
     Private Sub Initialize()
-        Dim template As New Segment(Console.WindowWidth / 2 - 1, Console.WindowHeight / 2, Segment.Directions.Right)
+        Dim template As New Segment(Console.WindowWidth / 2 - 1, Console.WindowHeight / 2, Segment.Directions.Right, ConsoleColor.White)
 
         suspendRenderer = True
 
         Snake.Clear()
-        For i As Integer = 0 To 2 - 1
-            Snake.Add(template.Clone())
-            template.Move()
-        Next
+        Snake.Add(template.Clone())
+        Snake.Add(template.Clone(ConsoleColor.Gray))
+        template.Move()
 
         Snake.ForEach(Sub(s) s.Direction = Segment.Directions.Left)
 
         bonuses.Clear()
+        foodItem = Nothing
 
         Console.BackgroundColor = ConsoleColor.Black
         Console.ForegroundColor = ConsoleColor.Gray
@@ -80,14 +93,49 @@ Partial Module ModuleMain
     Private Sub DisplayTitle()
         Console.Clear()
         Dim wh As Size = tr.MeassureText(Console.Title)
-        tr.Write(Console.Title, (Console.WindowWidth - wh.Width) / 2, (Console.WindowHeight - wh.Height) / 2, ConsoleColor.White)
+        tr.Write(Console.Title, (Console.WindowWidth - wh.Width) / 2, (Console.WindowHeight - 10 - wh.Height) / 2, ConsoleColor.DarkCyan)
 
-        Dim msg As String = "Press any key to start"
-        Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
-        Console.CursorTop = (Console.WindowHeight - wh.Height) / 2 + wh.Height
-        Console.WriteLine(msg)
+        Dim DrawCentered = Sub(x As Integer, msg As String, c As ConsoleColor)
+                               Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
+                               Console.CursorTop = x
+                               Console.ForegroundColor = c
+                               Console.Write(msg)
+                           End Sub
 
-        Console.ReadKey()
+        DrawCentered((Console.WindowHeight - wh.Height) / 2 + wh.Height - 6, "Press [ENTER] to start", ConsoleColor.White)
+
+        Dim k As Integer = 0
+        Dim ks As Integer = 1
+        Do
+            Dim opMsgs() As String = {"──────────────── Options ──────────────── ",
+                                     $"({If(youAreWhatYouEat, "√", "x")}) [Y]ou're Are What You Eat",
+                                     $"({If(expertMode, "√", "x")}) [E]xpert Mode            "}
+
+            If opMsgs(0)(k) = "─" Then opMsgs(0) = opMsgs(0).Substring(0, k) + "∙" + opMsgs(0).Substring(k + 1)
+            Select Case k
+                Case opMsgs(0).Length - 1 : ks = -1
+                Case 0 : ks = 1
+            End Select
+            k += ks
+
+            For i As Integer = 0 To opMsgs.Length - 1
+                DrawCentered((Console.WindowHeight - wh.Height) / 2 + wh.Height + 2 + i,
+                         opMsgs(i),
+                         If(i = 0, ConsoleColor.DarkGray, If(opMsgs(i).Contains("√"), ConsoleColor.White, ConsoleColor.Gray)))
+            Next
+
+            If Console.KeyAvailable Then
+                Select Case Console.ReadKey(True).Key
+                    Case ConsoleKey.Escape : Environment.Exit(0)
+                    Case ConsoleKey.Enter : Exit Do
+                    Case ConsoleKey.Y : youAreWhatYouEat = Not youAreWhatYouEat
+                    Case ConsoleKey.E : expertMode = Not expertMode
+                End Select
+            End If
+
+            Thread.Sleep(30)
+        Loop
+
         Console.Clear()
     End Sub
 
@@ -123,11 +171,8 @@ Partial Module ModuleMain
     Private Sub GameLoop()
         Dim delay As Integer = 10
 
-        Dim moveDelay As Integer = 50
+        Dim moveDelay As Integer
         Dim moveTimer As Integer = 0
-
-        Dim checkKeyDelay As Integer = 10
-        Dim checkKeyTimer As Integer = 0
 
         Dim foodItemDelay As Integer = 3000
         Dim foodItemTimer As Integer = 0
@@ -139,13 +184,15 @@ Partial Module ModuleMain
             ConsumeKeystrokes()
             Initialize()
 
+            moveDelay = If(expertMode, 30, 50)
+            renderDelay = moveDelay
+
             Do
                 Thread.Sleep(delay)
 
                 renderTimer += delay
                 moveTimer += delay
                 foodItemTimer += delay
-                checkKeyTimer += delay
 
                 If renderTimer >= renderDelay Then
                     renderTimer = 0
@@ -172,7 +219,11 @@ Partial Module ModuleMain
                         If foodItem.Item.IntersectsWidth(Snake(0)) Then
                             score += foodItem.Level
                             For i As Integer = 0 To foodItem.Level - 1
-                                Snake.Add(Snake.Last().Clone())
+                                If youAreWhatYouEat Then
+                                    Snake.Add(Snake.Last().Clone(foodItem.Item.Color))
+                                Else
+                                    Snake.Add(Snake.Last().Clone())
+                                End If
                             Next
                             bonuses.Add(foodItem.Clone())
                             bonuses.Last().Item.X = Console.WindowWidth - 12
@@ -204,7 +255,7 @@ Partial Module ModuleMain
                             Dim x As Integer = rnd.Next(2, Console.WindowWidth - 2)
                             Dim y As Integer = rnd.Next(2, Console.WindowHeight - 2)
 
-                            Dim s As New Segment(x, y, Segment.Directions.Same)
+                            Dim s As New Segment(x, y, Segment.Directions.Same, ConsoleColor.White)
                             For i As Integer = 0 To Snake.Count() - 1
                                 If Snake(i).IntersectsWidth(s) Then
                                     s = Nothing
@@ -222,27 +273,26 @@ Partial Module ModuleMain
                     End If
                 End If
 
-                If checkKeyTimer >= checkKeyDelay Then
-                    checkKeyTimer = 0
-
-                    If Console.KeyAvailable Then
-                        Select Case Console.ReadKey(True).Key
-                            Case ConsoleKey.LeftArrow : Snake(0).Direction = Segment.Directions.Left
-                            Case ConsoleKey.RightArrow : Snake(0).Direction = Segment.Directions.Right
-                            Case ConsoleKey.UpArrow : Snake(0).Direction = Segment.Directions.Up
-                            Case ConsoleKey.DownArrow : Snake(0).Direction = Segment.Directions.Down
-                        End Select
-                    End If
+                If Console.KeyAvailable Then
+                    Select Case Console.ReadKey(True).Key
+                        Case ConsoleKey.LeftArrow : Snake(0).Direction = Segment.Directions.Left
+                        Case ConsoleKey.RightArrow : Snake(0).Direction = Segment.Directions.Right
+                        Case ConsoleKey.UpArrow : Snake(0).Direction = Segment.Directions.Up
+                        Case ConsoleKey.DownArrow : Snake(0).Direction = Segment.Directions.Down
+                        Case ConsoleKey.Escape : Environment.Exit(0)
+                    End Select
                 End If
             Loop
 
             DisplayGameOver()
             ConsumeKeystrokes()
-            Console.ReadKey()
+            If Console.ReadKey(True).Key = ConsoleKey.Escape Then Environment.Exit(0)
         Loop
     End Sub
 
     Private Sub DrawBorder()
+        Console.ForegroundColor = ConsoleColor.White
+
         For x As Integer = 0 To Console.WindowWidth - 1
             Console.CursorLeft = x
             Console.CursorTop = 0
@@ -265,18 +315,16 @@ Partial Module ModuleMain
             eraseSegment.Dequeue().Draw(" "c)
         End While
 
-        Snake(0).Draw(ConsoleColor.White)
-        Snake(1).Draw(ConsoleColor.DarkGray)
+        If youAreWhatYouEat Then
+            Snake.ForEach(Sub(s) s.Draw())
+        Else
+            Snake(0).Draw()
+            Snake(1).Draw()
+        End If
 
         If foodItem IsNot Nothing AndAlso foodItem.IsNew Then
             foodItem.IsNew = False
-            Select Case foodItem.Level
-                Case 1 : foodItem.Item.Draw(ConsoleColor.Gray)
-                Case 2 : foodItem.Item.Draw(ConsoleColor.Yellow)
-                Case 3 : foodItem.Item.Draw(ConsoleColor.Green)
-                Case 4 : foodItem.Item.Draw(ConsoleColor.Blue)
-                Case 5 : foodItem.Item.Draw(ConsoleColor.Red)
-            End Select
+            foodItem.Item.Draw()
         End If
 
         Console.BackgroundColor = ConsoleColor.Black
@@ -291,14 +339,14 @@ Partial Module ModuleMain
         If foodItem IsNot Nothing Then
             Console.CursorLeft = 3
             Console.CursorTop = Console.WindowHeight - 1
-
+            Console.ForegroundColor = foodItem.Item.Color
             Console.Write(" +{0}: {1:N0} ", foodItem.Level, (foodItemLifeSpan - (TimeSpan.FromTicks(Now.Ticks) - foodItem.CreatedOn)).TotalSeconds)
         ElseIf showingTimer Then
             showingTimer = False
 
             Console.CursorLeft = 3
             Console.CursorTop = Console.WindowHeight - 1
-
+            Console.ForegroundColor = ConsoleColor.White
             Console.Write("████████")
         End If
     End Sub
@@ -311,6 +359,7 @@ Partial Module ModuleMain
             For i As Integer = 0 To bonuses.Count - 1
                 Console.CursorLeft = bonuses(i).Item.X
                 Console.CursorTop = bonuses(i).Item.Y
+                Console.ForegroundColor = ConsoleColor.White
                 Console.Write("██")
 
                 bonuses(i).Item.X -= 1
@@ -321,6 +370,7 @@ Partial Module ModuleMain
                 End If
 
                 Console.CursorLeft = bonuses(i).Item.X
+                Console.ForegroundColor = bonuses(i).Item.Color
                 Console.Write("+{0}", bonuses(i).Level)
             Next
         Loop Until exitDo
@@ -328,6 +378,7 @@ Partial Module ModuleMain
 
     Private Sub RenderScore()
         If lastScore <> score Then
+            Console.ForegroundColor = ConsoleColor.White
             Console.CursorLeft = Console.WindowWidth - 8
             Console.CursorTop = 0
             Console.Write(" {0} ", score)
