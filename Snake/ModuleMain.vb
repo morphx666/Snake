@@ -480,14 +480,12 @@ Partial Module ModuleMain
     Private Sub SetHighScore()
         suspendRenderer = True
 
-        Dim ohs = highScores.OrderByDescending(Function(k) k.Score)
-        For i As Integer = ohs.Count - 1 To 0 Step -1
-            If score > ohs(i).Score Then
-                ohs(i).Name = EnterUserName()
-                ohs(i).Score = score
-                ohs(i).LevelName = currentLevel.Name
-                ohs(i).LevelIndex = currentLevel.Index
-
+        For i As Integer = 0 To highScores.Count - 1
+            If score > highScores(i).Score Then
+                highScores.Insert(i, New HighScore(EnterUserName(),
+                                                   score,
+                                                   currentLevel.Name,
+                                                   currentLevel.Index))
                 SaveNVRam()
                 Exit For
             End If
