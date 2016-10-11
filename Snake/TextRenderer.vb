@@ -52,20 +52,26 @@ Public Class TextRenderer
         End Function
     End Class
 
-    Private kerning As Double = 0.6
     Private alphabet As New Dictionary(Of CharType, String)
 
     Public Sub New()
     End Sub
 
-    Public Function MeassureText(value As String, Optional fontFamily As String = "Consolas", Optional fontSize As Single = 8) As Size
+    Public Function MeassureText(value As String,
+                                 Optional fontFamily As String = "Consolas",
+                                 Optional fontSize As Single = 8,
+                                 Optional kerning As Double = 0.6) As Size
         CreateBitmaps(value(0), fontFamily, fontSize)
         Dim ct As New CharType(value(0), fontFamily, fontSize)
 
         Return New Size(ct.CharSize.Width * kerning * value.Length, ct.CharSize.Height)
     End Function
 
-    Public Sub Write(value As String, x As Integer, y As Integer, fc As ConsoleColor, Optional fontFamily As String = "Consolas", Optional fontSize As Single = 8, Optional f As String = "█")
+    Public Sub Write(value As String, x As Integer, y As Integer, fc As ConsoleColor,
+                     Optional fontFamily As String = "Consolas",
+                     Optional fontSize As Single = 8,
+                     Optional f As String = "█",
+                     Optional kerning As Double = 0.6)
         CreateBitmaps(value, fontFamily, fontSize)
         Console.ForegroundColor = fc
         Try

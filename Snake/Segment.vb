@@ -37,10 +37,11 @@
         End Select
     End Sub
 
-    Public Sub Draw(Optional c As Char = "█")
+    Public Sub Draw(Optional c As Char = "█", Optional bc As ConsoleColor = ConsoleColor.Black)
         Console.CursorLeft = mX
         Console.CursorTop = mY
 
+        Console.BackgroundColor = bc
         Console.ForegroundColor = mColor
 
         Console.Write(c, mX, mY)
@@ -55,7 +56,7 @@
         Console.Write(" ", mX, mY)
     End Sub
 
-    Public Function IntersectsWidth(s As Segment) As Boolean
+    Public Function IntersectsWith(s As Segment) As Boolean
         Return mX = s.X AndAlso mY = s.Y
     End Function
 

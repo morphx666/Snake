@@ -73,6 +73,9 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FoodItem.vb" />
+    <Compile Include="Level.vb" />
+    <Compile Include="Mazes.vb" />
     <Compile Include="ModuleMain.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -91,6 +94,7 @@
     </Compile>
     <Compile Include="Segment.vb" />
     <Compile Include="TextRenderer.vb" />
+    <Compile Include="Win32Native.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
