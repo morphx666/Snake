@@ -486,6 +486,7 @@ Partial Module ModuleMain
                                                    score,
                                                    currentLevel.Name,
                                                    currentLevel.Index))
+                highScores.Remove(highScores.Last())
                 SaveNVRam()
                 Exit For
             End If
