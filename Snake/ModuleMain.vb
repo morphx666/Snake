@@ -3,11 +3,12 @@ Imports System.Threading
 
 Partial Module ModuleMain
     Private Enum LooseReason
+        None
         EatOwnTail
         HitWall
         HitMaze
         Hunger
-        OutOfLifes
+        OutOfLives
         UserQuit
     End Enum
 
@@ -51,7 +52,7 @@ Partial Module ModuleMain
     Private food As FoodItem
     Private bonuses As New List(Of FoodItem)
     Private youAreWhatYouEat As Boolean = False
-    Private lifes As Integer
+    Private lives As Integer
     Private highScores As New List(Of HighScore)(10 - 1)
     Private lastestHighScore As HighScore
 
@@ -59,7 +60,7 @@ Partial Module ModuleMain
     Private currentLevel As Level
     Private foodItemsCount As Integer
     Private levelFoodItemsCount As Integer
-    Private reason As LooseReason
+    Private reason As LooseReason = LooseReason.None
 
     Private foodItemLifeSpan As TimeSpan
     Private showingTimer As Boolean
@@ -140,7 +141,7 @@ Partial Module ModuleMain
 
         score = 0
         lastScore = -1
-        lifes = 3
+        lives = 3
 
         DisplayTitle()
         SaveNVRam()
@@ -282,9 +283,29 @@ Partial Module ModuleMain
 
         Thread.Sleep(500)
 
-        RenderBanner(msg1,
-                     ConsoleColor.White, ConsoleColor.Blue,
-                     True, False, , 2)
+        Dim wh As Size = RenderBanner(msg1,
+                                     ConsoleColor.White, ConsoleColor.Blue,
+                                     True, False, , 2)
+
+        Dim reasonStr As String = ""
+        Select Case reason
+            Case LooseReason.EatOwnTail : reasonStr = "Oops! You're not supposed to eat yourself!"
+            Case LooseReason.HitMaze : reasonStr = "Oops! Don't hit the maze walls!"
+            Case LooseReason.HitWall : reasonStr = "Oops! Don't hit the walls!"
+            Case LooseReason.Hunger : reasonStr = "Oops! You just starved your snake to death!"
+        End Select
+        If reasonStr <> "" Then
+            Console.ForegroundColor = ConsoleColor.Blue
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 2)
+            Console.Write("│" + "│".PadLeft(wh.Width))
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 3)
+            Console.Write("│" + "│".PadLeft(wh.Width))
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 4)
+            Console.Write("└" + StrDup(wh.Width - 1, "─") + "┘")
+            Console.ForegroundColor = ConsoleColor.White
+            Console.SetCursorPosition((Console.WindowWidth - reasonStr.Length) / 2, wh.Height + 3)
+            Console.Write(reasonStr)
+        End If
 
         Dim wh2 As Size = tr.MeassureText(msg2)
         RenderBanner(msg2,
@@ -358,6 +379,8 @@ Partial Module ModuleMain
                 DisplayLevel()
                 InitializeSnake()
 
+                reason = LooseReason.None
+
                 moveDelay = currentLevel.MoveDelay - If(expertMode, 10, 0)
                 renderDelay = moveDelay
 
@@ -404,7 +427,7 @@ Partial Module ModuleMain
                         If food IsNot Nothing Then
                             If food.Item.IntersectsWith(snake(0)) Then
                                 If Int((score + food.Level) / 100) > Int(score / 100) Then
-                                    lifes += 1
+                                    lives += 1
                                     RenderLivesAndLevel()
                                 End If
                                 score += food.Level
@@ -494,10 +517,10 @@ Partial Module ModuleMain
 
                 ApplyBonus(0)
 
-                lifes -= 1
-                If lifes = 0 Then
+                lives -= 1
+                If lives = 0 Then
                     RenderLivesAndLevel()
-                    reason = LooseReason.OutOfLifes
+                    reason = LooseReason.OutOfLives
                     Exit Do
                 End If
             Loop
@@ -744,8 +767,8 @@ Partial Module ModuleMain
 
     Private Sub RenderLivesAndLevel()
         Console.ForegroundColor = If(expertMode, ConsoleColor.White, ConsoleColor.Gray)
-        Console.SetCursorPosition(Console.WindowWidth - 8 - lifes - 5, Console.WindowHeight - 1)
-        Console.Write($" {StrDup(lifes, "▌")} | {currentLevel.Index} | {currentLevel.FoodItemsCount - foodItemsCount} ")
+        Console.SetCursorPosition(Console.WindowWidth - 8 - lives - 5, Console.WindowHeight - 1)
+        Console.Write($" {StrDup(lives, "▌")} | {currentLevel.Index} | {currentLevel.FoodItemsCount - foodItemsCount} ")
     End Sub
 
     Private Sub ConsumeKeystrokes()
