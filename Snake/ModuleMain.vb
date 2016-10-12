@@ -15,8 +15,11 @@ Partial Module ModuleMain
         Public Property Score As Integer
         Public Property LevelName As String
         Public Property LevelIndex As Integer
+        Public Property ExpertMode As Boolean
 
-        Public Sub New(name As String, score As Integer, levelName As String, levelIndex As Integer)
+        Public Sub New(name As String, score As Integer,
+                       levelName As String, levelIndex As Integer,
+                       expertMode As Boolean)
             If name.Length < 3 Then name = name.PadRight(3)
             If name.Length > 3 Then name = name.Substring(0, 3)
 
@@ -24,6 +27,7 @@ Partial Module ModuleMain
             Me.Score = score
             Me.LevelName = levelName
             Me.LevelIndex = levelIndex
+            Me.ExpertMode = expertMode
         End Sub
 
         Public Function ToXML() As XElement
@@ -32,6 +36,7 @@ Partial Module ModuleMain
                        <score><%= Score %></score>
                        <levelName><%= LevelName %></levelName>
                        <levelIndex><%= LevelIndex %></levelIndex>
+                       <expertMode><%= ExpertMode %></expertMode>
                    </highScore>
         End Function
     End Class
@@ -95,15 +100,28 @@ Partial Module ModuleMain
             Boolean.TryParse(xml.<settings>.<expertMode>.Value, expertMode)
             Boolean.TryParse(xml.<settings>.<youAreWhatYouEat>.Value, youAreWhatYouEat)
 
+            Dim hsName As String
+            Dim hsScore As Integer
+            Dim hsLevelName As String
+            Dim hsLevelIndex As Integer
+            Dim hsExpertMode As Boolean
+
             For Each hs In xml.<settings>.<highScores>.<highScore>
-                highScores.Add(New HighScore(hs.<name>.Value,
-                                             hs.<score>.Value,
-                                             hs.<levelName>.Value,
-                                             hs.<levelIndex>.Value))
+                hsName = hs.<name>.Value
+                Integer.TryParse(hs.<score>.Value, hsScore)
+                hsLevelName = hs.<levelName>.Value
+                Integer.TryParse(hs.<levelIndex>.Value, hsLevelIndex)
+                Boolean.TryParse(hs.<expertMode>.Value, hsExpertMode)
+
+                highScores.Add(New HighScore(hsName,
+                                             hsScore,
+                                             hsLevelName,
+                                             hsLevelIndex,
+                                             hsExpertMode))
             Next
         Else
             For i As Integer = 0 To 9
-                highScores.Add(New HighScore("...", 0, "Warming Up", 1))
+                highScores.Add(New HighScore("...", 0, "Warming Up", 1, False))
             Next
         End If
     End Sub
@@ -233,7 +251,7 @@ Partial Module ModuleMain
                 Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2 + x
                 For k As Integer = 0 To colors.Length - 1
                     If x >= colors(k)(0) AndAlso x <= colors(k)(0) + colors(k)(1) Then
-                        Console.ForegroundColor = colors(k)(2)
+                        Console.ForegroundColor = If(hs.ExpertMode AndAlso x <= colors(0)(1), ConsoleColor.Red, colors(k)(2))
                         Exit For
                     End If
                 Next
@@ -444,7 +462,7 @@ Partial Module ModuleMain
 
                                 If s IsNot Nothing Then
                                     food = New FoodItem(x, y, rnd.Next(1, 6))
-                                    foodItemLifeSpan = TimeSpan.FromSeconds(20 -
+                                    foodItemLifeSpan = TimeSpan.FromSeconds(If(expertMode, 10, 20) -
                                                                             food.Level +
                                                                             currentLevel.Index / 2 +
                                                                             snake.Count / 10)
@@ -489,7 +507,8 @@ Partial Module ModuleMain
                 Dim hs As New HighScore(EnterUserName(),
                                                    score,
                                                    currentLevel.Name,
-                                                   currentLevel.Index)
+                                                   currentLevel.Index,
+                                                   expertMode)
                 highScores.Insert(i, hs)
                 lastestHighScore = hs
                 highScores.Remove(highScores.Last())
