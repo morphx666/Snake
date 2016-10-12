@@ -8,6 +8,7 @@ Partial Module ModuleMain
         HitMaze
         Hunger
         OutOfLifes
+        UserQuit
     End Enum
 
     Private Class HighScore
@@ -479,10 +480,14 @@ Partial Module ModuleMain
                             Case ConsoleKey.RightArrow : snake(0).Direction = Segment.Directions.Right
                             Case ConsoleKey.UpArrow : snake(0).Direction = Segment.Directions.Up
                             Case ConsoleKey.DownArrow : snake(0).Direction = Segment.Directions.Down
-                            Case ConsoleKey.Escape : Environment.Exit(0)
+                            Case ConsoleKey.Escape
+                                reason = LooseReason.UserQuit
+                                Exit Do
                         End Select
                     End If
                 Loop
+
+                If reason = LooseReason.UserQuit Then Exit Do
 
                 lifes -= 1
                 If lifes = 0 Then
@@ -492,10 +497,12 @@ Partial Module ModuleMain
                 End If
             Loop
 
-            ConsumeKeystrokes()
-            DisplayGameOver()
-            SetHighScore()
-            ConsumeKeystrokes()
+            If reason <> LooseReason.UserQuit Then
+                ConsumeKeystrokes()
+                DisplayGameOver()
+                SetHighScore()
+                ConsumeKeystrokes()
+            End If
         Loop
     End Sub
 
