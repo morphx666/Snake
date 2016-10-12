@@ -238,6 +238,7 @@ Partial Module ModuleMain
                                         New Integer() {6, 7, ConsoleColor.Yellow},
                                         New Integer() {16, 14, ConsoleColor.DarkCyan},
                                         New Integer() {30, 4, ConsoleColor.Gray}}
+
         For Each hs In highScores.OrderByDescending(Function(k) k.Score)
             Console.CursorTop = y
 
@@ -248,8 +249,8 @@ Partial Module ModuleMain
             End If
 
             Dim msg As String = $"{hs.Name}   {hs.Score.ToString("N0").PadLeft(7)}   {hs.LevelName.PadRight(14).Substring(0, 14)} {hs.LevelIndex.ToString().PadLeft(3)}"
+            Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
             For x As Integer = 0 To msg.Length - 1
-                Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2 + x
                 For k As Integer = 0 To colors.Length - 1
                     If x >= colors(k)(0) AndAlso x <= colors(k)(0) + colors(k)(1) Then
                         Console.ForegroundColor = If(hs.ExpertMode AndAlso x <= colors(0)(1), ConsoleColor.Red, colors(k)(2))
