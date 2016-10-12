@@ -189,7 +189,7 @@ Partial Module ModuleMain
         DrawCentered(wh.Height,
                      "Press [ENTER] to start", ConsoleColor.White)
 
-        DisplayHighScores(wh.Height + 2)
+        DisplayHighScores(wh.Height + 3)
 
         Dim k As Integer = 0
         Dim ks As Integer = 1
@@ -260,6 +260,8 @@ Partial Module ModuleMain
             Next
             y += 1
         Next
+
+        Console.BackgroundColor = ConsoleColor.Black
     End Sub
 
     Private Sub DisplayGameOver()
@@ -489,6 +491,8 @@ Partial Module ModuleMain
 
                 If reason = LooseReason.UserQuit Then Exit Do
 
+                ApplyBonus(0)
+
                 lifes -= 1
                 If lifes = 0 Then
                     RenderLivesAndLevel()
@@ -499,11 +503,33 @@ Partial Module ModuleMain
 
             If reason <> LooseReason.UserQuit Then
                 ConsumeKeystrokes()
+                ApplyBonus(2)
                 DisplayGameOver()
                 SetHighScore()
                 ConsumeKeystrokes()
             End If
         Loop
+    End Sub
+
+    Private Sub ApplyBonus(m As Integer)
+        suspendRenderer = True
+
+        For i As Integer = 0 To snake.Count - 1
+            Thread.Sleep(50)
+
+            If snake(i).X > 0 AndAlso snake(i).X < Console.WindowWidth - 1 AndAlso
+                    snake(i).Y > 0 AndAlso snake(i).Y < Console.WindowHeight - 1 AndAlso
+                    Not currentLevel.IntersectsWith(snake(i)) Then
+                snake(i).Draw(" "c)
+            End If
+
+            If m > 0 Then
+                score += m
+                RenderScore(True)
+            End If
+        Next
+
+        suspendRenderer = False
     End Sub
 
     Private Sub SetHighScore()
@@ -599,6 +625,7 @@ Partial Module ModuleMain
             Else
                 currentLevel = levels(currentLevel.Index)
             End If
+            ApplyBonus(1)
             DisplayLevel()
 
             snake(0).X = Console.WindowWidth / 2 - 1
@@ -715,7 +742,7 @@ Partial Module ModuleMain
     End Sub
 
     Private Sub RenderLivesAndLevel()
-        Console.ForegroundColor = ConsoleColor.White
+        Console.ForegroundColor = If(expertMode, ConsoleColor.White, ConsoleColor.Gray)
         Console.SetCursorPosition(Console.WindowWidth - 8 - lifes - 5, Console.WindowHeight - 1)
         Console.Write($" {StrDup(lifes, "▌")} | {currentLevel.Index} | {currentLevel.FoodItemsCount - foodItemsCount} ")
     End Sub
