@@ -47,6 +47,7 @@ Partial Module ModuleMain
     Private youAreWhatYouEat As Boolean = False
     Private lifes As Integer
     Private highScores As New List(Of HighScore)(10 - 1)
+    Private lastestHighScore As HighScore
 
     Private levels As New List(Of Level)
     Private currentLevel As Level
@@ -64,6 +65,7 @@ Partial Module ModuleMain
     Private tr As New TextRenderer()
 
     Sub Main()
+        Console.CursorVisible = False
         Win32Native.MaximizeConsoleWindow()
 
         LoadNVRam()
@@ -116,7 +118,6 @@ Partial Module ModuleMain
         Console.ForegroundColor = ConsoleColor.Gray
         Console.Clear()
         Console.Title = "SNAKE"
-        Console.CursorVisible = False
 
         score = 0
         lastScore = -1
@@ -161,8 +162,7 @@ Partial Module ModuleMain
         Dim wh As Size = tr.MeassureText(Console.Title)
 
         Dim DrawCentered = Sub(y As Integer, msg As String, c As ConsoleColor)
-                               Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
-                               Console.CursorTop = y
+                               Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, y)
                                Console.ForegroundColor = c
                                Console.Write(msg)
                            End Sub
@@ -222,6 +222,12 @@ Partial Module ModuleMain
         For Each hs In highScores.OrderByDescending(Function(k) k.Score)
             Console.CursorTop = y
 
+            If hs.Equals(lastestHighScore) Then
+                Console.BackgroundColor = ConsoleColor.DarkGray
+            Else
+                Console.BackgroundColor = ConsoleColor.Black
+            End If
+
             Dim msg As String = $"{hs.Name}   {hs.Score.ToString("N0").PadLeft(7)}   {hs.LevelName.PadRight(14).Substring(0, 14)} {hs.LevelIndex.ToString().PadLeft(3)}"
             For x As Integer = 0 To msg.Length - 1
                 Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2 + x
@@ -243,8 +249,7 @@ Partial Module ModuleMain
         RenderBanner(msg, ConsoleColor.White, ConsoleColor.Red, True, True)
 
         msg = "Press any key to restart"
-        Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
-        Console.CursorTop = (Console.WindowHeight - wh.Height) / 2 + wh.Height + 2
+        Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, (Console.WindowHeight - wh.Height) / 2 + wh.Height + 2)
         Console.WriteLine(msg)
         If Console.ReadKey(True).Key = ConsoleKey.Escape Then Environment.Exit(0)
     End Sub
@@ -295,8 +300,7 @@ Partial Module ModuleMain
 
         For Each f As Char In If(animate, {"░", "░", "▒", "▓", "█"}, "█")
             For y1 As Integer = y To y + wh.Height - 1
-                Console.CursorTop = y1
-                Console.CursorLeft = x
+                Console.SetCursorPosition(x, y1)
                 For x1 As Integer = x - wh.Width \ 2 To x + wh.Width \ 2
                     Console.Write(" ")
                 Next
@@ -482,10 +486,12 @@ Partial Module ModuleMain
 
         For i As Integer = 0 To highScores.Count - 1
             If score > highScores(i).Score Then
-                highScores.Insert(i, New HighScore(EnterUserName(),
+                Dim hs As New HighScore(EnterUserName(),
                                                    score,
                                                    currentLevel.Name,
-                                                   currentLevel.Index))
+                                                   currentLevel.Index)
+                highScores.Insert(i, hs)
+                lastestHighScore = hs
                 highScores.Remove(highScores.Last())
                 SaveNVRam()
                 Exit For
@@ -502,6 +508,7 @@ Partial Module ModuleMain
         Dim selIndex As Integer = 0
 
         For i As Integer = Asc("A") To Asc("Z") : c.Add(Chr(i)) : Next
+        c.AddRange({".", "/", "\", "+", "-"})
         For i As Integer = Asc(0) To Asc(9) : c.Add(Chr(i)) : Next
 
         Dim msg As String = "High Score!"
@@ -512,13 +519,11 @@ Partial Module ModuleMain
         Dim mx As Integer = (Console.WindowWidth - wh.Width) / 2
         Dim my As Integer = wh.Height + 3
         Console.BackgroundColor = ConsoleColor.Blue
-        Console.CursorLeft = mx
-        Console.CursorTop = my - 1
+        Console.SetCursorPosition(mx, my - 1)
         Console.Write(StrDup(wh.Width, "─"))
 
         For y As Integer = my To my + cs.Height + 1
-            Console.CursorLeft = mx
-            Console.CursorTop = y
+            Console.SetCursorPosition(mx, y)
             For x As Integer = 0 To wh.Width - 1
                 Console.Write(" ")
             Next
@@ -533,8 +538,7 @@ Partial Module ModuleMain
                              i * cs.Width * 3 - cs.Width * 3 - 1, my + 1,
                              ,, 0.5, False)
             Next
-            Console.CursorTop = 1
-            Console.CursorLeft = 1
+            Console.SetCursorPosition(1, 1)
 
             Do
                 If Console.KeyAvailable Then
@@ -556,8 +560,7 @@ Partial Module ModuleMain
     End Function
 
     Private Sub EraseFoodItem()
-        Console.CursorLeft = food.Item.X
-        Console.CursorTop = food.Item.Y
+        Console.SetCursorPosition(food.Item.X, food.Item.Y)
         Console.Write(" ")
     End Sub
 
@@ -588,8 +591,7 @@ Partial Module ModuleMain
         For y As Integer = 0 To Console.WindowHeight - 1
             For x As Integer = 0 To Console.WindowWidth - 1
                 If currentLevel.Maze(y * Console.WindowWidth + x) Then
-                    Console.CursorLeft = x
-                    Console.CursorTop = y
+                    Console.SetCursorPosition(x, y)
                     Console.Write("▓")
                 End If
             Next
@@ -600,16 +602,14 @@ Partial Module ModuleMain
         Console.ForegroundColor = ConsoleColor.White
 
         For x As Integer = 0 To Console.WindowWidth - 1
-            Console.CursorLeft = x
-            Console.CursorTop = 0
+            Console.SetCursorPosition(x, 0)
             Console.Write("█")
             Console.CursorTop = Console.WindowHeight - 1
             Console.Write("█")
         Next
 
         For y As Integer = 1 To Console.WindowHeight - 2
-            Console.CursorTop = y
-            Console.CursorLeft = 0
+            Console.SetCursorPosition(0, y)
             Console.Write("█")
             Console.CursorLeft = Console.WindowWidth - 1
             Console.Write("█")
@@ -644,15 +644,12 @@ Partial Module ModuleMain
 
     Private Sub RenderFoodItemTimer()
         If food IsNot Nothing Then
-            Console.CursorLeft = 3
-            Console.CursorTop = Console.WindowHeight - 1
+            Console.SetCursorPosition(3, Console.WindowHeight - 1)
             Console.ForegroundColor = food.Item.Color
             Console.Write(" +{0}: {1:N0} ", food.Level, (foodItemLifeSpan - (TimeSpan.FromTicks(Now.Ticks) - food.CreatedOn)).TotalSeconds)
         ElseIf showingTimer Then
             showingTimer = False
-
-            Console.CursorLeft = 3
-            Console.CursorTop = Console.WindowHeight - 1
+            Console.SetCursorPosition(3, Console.WindowHeight - 1)
             Console.ForegroundColor = ConsoleColor.White
             Console.Write("████████")
         End If
@@ -664,8 +661,7 @@ Partial Module ModuleMain
             exitDo = True
 
             For i As Integer = 0 To bonuses.Count - 1
-                Console.CursorLeft = bonuses(i).Item.X
-                Console.CursorTop = bonuses(i).Item.Y
+                Console.SetCursorPosition(bonuses(i).Item.X, bonuses(i).Item.Y)
                 Console.ForegroundColor = ConsoleColor.White
                 Console.Write("██")
 
@@ -686,18 +682,15 @@ Partial Module ModuleMain
     Private Sub RenderScore(Optional force As Boolean = False)
         If lastScore <> score OrElse force Then
             Console.ForegroundColor = ConsoleColor.White
-            Console.CursorLeft = Console.WindowWidth - 8
-            Console.CursorTop = 0
+            Console.SetCursorPosition(Console.WindowWidth - 8, 0)
             Console.Write($" {score} ")
-
             lastScore = score
         End If
     End Sub
 
     Private Sub RenderLivesAndLevel()
         Console.ForegroundColor = ConsoleColor.White
-        Console.CursorLeft = Console.WindowWidth - 8 - lifes - 5
-        Console.CursorTop = Console.WindowHeight - 1
+        Console.SetCursorPosition(Console.WindowWidth - 8 - lifes - 5, Console.WindowHeight - 1)
         Console.Write($" {StrDup(lifes, "▌")} | {currentLevel.Index} | {currentLevel.FoodItemsCount - foodItemsCount} ")
     End Sub
 
