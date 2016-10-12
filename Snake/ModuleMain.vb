@@ -461,8 +461,8 @@ Partial Module ModuleMain
                                 End If
 
                                 If s IsNot Nothing Then
-                                    food = New FoodItem(x, y, rnd.Next(1, 6))
-                                    foodItemLifeSpan = TimeSpan.FromSeconds(If(expertMode, 10, 20) -
+                                    food = New FoodItem(x, y, rnd.Next(1, If(expertMode, 12, 6)))
+                                    foodItemLifeSpan = TimeSpan.FromSeconds(20 -
                                                                             food.Level +
                                                                             currentLevel.Index / 2 +
                                                                             snake.Count / 10)
@@ -682,10 +682,10 @@ Partial Module ModuleMain
             For i As Integer = 0 To bonuses.Count - 1
                 Console.SetCursorPosition(bonuses(i).Item.X, bonuses(i).Item.Y)
                 Console.ForegroundColor = ConsoleColor.White
-                Console.Write("██")
+                Console.Write("███")
 
                 bonuses(i).Item.X -= 1
-                If bonuses(i).Item.X <= 2 Then
+                If bonuses(i).Item.X <= 3 Then
                     bonuses.RemoveAt(i)
                     exitDo = False
                     Exit For

@@ -13,11 +13,17 @@
 
     Private Function GetColor() As ConsoleColor
         Select Case Level
-            Case 1 : Return ConsoleColor.Gray
-            Case 2 : Return ConsoleColor.Yellow
-            Case 3 : Return ConsoleColor.Green
-            Case 4 : Return ConsoleColor.Blue
-            Case 5 : Return ConsoleColor.Red
+            Case 1 : Return ConsoleColor.DarkGray
+            Case 2 : Return ConsoleColor.DarkYellow
+            Case 3 : Return ConsoleColor.DarkGreen
+            Case 4 : Return ConsoleColor.DarkBlue
+            Case 5 : Return ConsoleColor.DarkRed
+            Case 6 : Return ConsoleColor.Gray
+            Case 7 : Return ConsoleColor.Yellow
+            Case 8 : Return ConsoleColor.Green
+            Case 9 : Return ConsoleColor.Blue
+            Case 10 : Return ConsoleColor.Red
+            Case 11 : Return ConsoleColor.White
             Case Else : Return ConsoleColor.Black
         End Select
     End Function
