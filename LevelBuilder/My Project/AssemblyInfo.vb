@@ -8,17 +8,17 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("Centepide")>
+<Assembly: AssemblyTitle("Snake LevelBuilder")>
 <Assembly: AssemblyDescription("")>
-<Assembly: AssemblyCompany("")>
-<Assembly: AssemblyProduct("Centepide")>
-<Assembly: AssemblyCopyright("Copyright ©  2016")>
+<Assembly: AssemblyCompany("xFX JumpStart")>
+<Assembly: AssemblyProduct("Snake LevelBuilder")>
+<Assembly: AssemblyCopyright("Copyright © 2016")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
 
 'The following GUID is for the ID of the typelib if this project is exposed to COM
-<Assembly: Guid("9f6366ab-ef1c-4c9b-ade2-126ea8346712")>
+<Assembly: Guid("72d420a2-2257-4489-a885-21101d46a6fa")>
 
 ' Version information for an assembly consists of the following four values:
 '
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2016.10.13.297")>
-<Assembly: AssemblyFileVersion("2016.10.13.297")>
+<Assembly: AssemblyVersion("2016.10.13.1")>
+<Assembly: AssemblyFileVersion("2016.10.13.1")>

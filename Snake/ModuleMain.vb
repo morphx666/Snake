@@ -2,13 +2,12 @@
 Imports System.Threading
 
 Partial Module ModuleMain
-    Private Enum LooseReason
+    Public Enum LooseReason
         None
         EatOwnTail
         HitWall
         HitMaze
         Hunger
-        OutOfLives
         UserQuit
     End Enum
 
@@ -51,7 +50,7 @@ Partial Module ModuleMain
     Private eraseSegment As New Queue(Of Segment)
     Private food As FoodItem
     Private bonuses As New List(Of FoodItem)
-    Private youAreWhatYouEat As Boolean = False
+    Private youAreWhatYouEat As Boolean = True
     Private lives As Integer
     Private highScores As New List(Of HighScore)(10 - 1)
     Private lastestHighScore As HighScore
@@ -68,6 +67,8 @@ Partial Module ModuleMain
 
     Private score As Integer
     Private lastScore As Integer = -1
+
+    Private rnd As New Random()
 
     Private tr As New TextRenderer()
 
@@ -123,7 +124,7 @@ Partial Module ModuleMain
             Next
         Else
             For i As Integer = 0 To 9
-                highScores.Add(New HighScore("...", 0, "Warming Up", 1, False))
+                highScores.Add(New HighScore("...", 10, "Warming Up", 1, False))
             Next
         End If
     End Sub
@@ -268,13 +269,31 @@ Partial Module ModuleMain
 
     Private Sub DisplayGameOver()
         Dim msg As String = "GAME OVER"
-        Dim wh = tr.MeassureText(msg)
-        RenderBanner(msg, ConsoleColor.White, ConsoleColor.Red, True, True)
+        Dim wh = RenderBanner(msg, ConsoleColor.White, ConsoleColor.Red, True, True)
+        PrintReason(wh, (Console.WindowHeight - wh.Height) / 2 - 3, ConsoleColor.Red)
 
         msg = "Press any key to restart"
-        Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, (Console.WindowHeight - wh.Height) / 2 + wh.Height + 2)
+        Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, (Console.WindowHeight - wh.Height) / 2 + wh.Height + 4)
         Console.WriteLine(msg)
         If Console.ReadKey(True).Key = ConsoleKey.Escape Then Environment.Exit(0)
+        Console.Clear()
+        RenderBorder()
+    End Sub
+
+    Private Sub PrintReason(wh As Size, y As Integer, bc As ConsoleColor)
+        Dim reasonStr As String = GetMessage(reason, rnd)
+        If reasonStr <> "" Then
+            Console.ForegroundColor = bc
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 2 + y)
+            Console.Write("│" + "│".PadLeft(wh.Width))
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 3 + y)
+            Console.Write("│" + "│".PadLeft(wh.Width))
+            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 4 + y)
+            Console.Write("└" + StrDup(wh.Width - 1, "─") + "┘")
+            Console.ForegroundColor = ConsoleColor.White
+            Console.SetCursorPosition((Console.WindowWidth - reasonStr.Length) / 2, wh.Height + 3 + y)
+            Console.Write(reasonStr)
+        End If
     End Sub
 
     Private Sub DisplayLevel()
@@ -287,25 +306,7 @@ Partial Module ModuleMain
                                      ConsoleColor.White, ConsoleColor.Blue,
                                      True, False, , 2)
 
-        Dim reasonStr As String = ""
-        Select Case reason
-            Case LooseReason.EatOwnTail : reasonStr = "Oops! You're not supposed to eat yourself!"
-            Case LooseReason.HitMaze : reasonStr = "Oops! Don't hit the maze walls!"
-            Case LooseReason.HitWall : reasonStr = "Oops! Don't hit the walls!"
-            Case LooseReason.Hunger : reasonStr = "Oops! You just starved your snake to death!"
-        End Select
-        If reasonStr <> "" Then
-            Console.ForegroundColor = ConsoleColor.Blue
-            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 2)
-            Console.Write("│" + "│".PadLeft(wh.Width))
-            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 3)
-            Console.Write("│" + "│".PadLeft(wh.Width))
-            Console.SetCursorPosition((Console.WindowWidth - wh.Width) / 2, wh.Height + 4)
-            Console.Write("└" + StrDup(wh.Width - 1, "─") + "┘")
-            Console.ForegroundColor = ConsoleColor.White
-            Console.SetCursorPosition((Console.WindowWidth - reasonStr.Length) / 2, wh.Height + 3)
-            Console.Write(reasonStr)
-        End If
+        PrintReason(wh, 0, ConsoleColor.Blue)
 
         Dim wh2 As Size = tr.MeassureText(msg2)
         RenderBanner(msg2,
@@ -318,6 +319,9 @@ Partial Module ModuleMain
                          True, True,, 1,, 7)
             Thread.Sleep(1000)
         Next
+
+        reason = LooseReason.None
+
         Console.Clear()
         RenderBorder()
         RenderScore(True)
@@ -378,8 +382,6 @@ Partial Module ModuleMain
             Do
                 DisplayLevel()
                 InitializeSnake()
-
-                reason = LooseReason.None
 
                 moveDelay = currentLevel.MoveDelay - If(expertMode, 10, 0)
                 renderDelay = moveDelay
@@ -465,9 +467,7 @@ Partial Module ModuleMain
                     End If
 
                     If foodItemTimer >= foodItemDelay Then
-                        Dim rnd As New Random()
-
-                        foodItemTimer = rnd.Next(0, foodItemDelay)
+                        foodItemTimer = Rnd.Next(0, foodItemDelay)
 
                         If food Is Nothing Then
                             Do
@@ -520,7 +520,6 @@ Partial Module ModuleMain
                 lives -= 1
                 If lives = 0 Then
                     RenderLivesAndLevel()
-                    reason = LooseReason.OutOfLives
                     Exit Do
                 End If
             Loop

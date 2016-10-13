@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Snake", "Snake\Snake.vbproj", "{0171ACA4-83F8-4083-9E7F-D386860FF061}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Snake LevelBuilder", "LevelBuilder\Snake LevelBuilder.vbproj", "{25DCC8BD-D079-40FB-80C9-4767C1159203}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,17 +17,12 @@ Global
 		{0171ACA4-83F8-4083-9E7F-D386860FF061}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0171ACA4-83F8-4083-9E7F-D386860FF061}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0171ACA4-83F8-4083-9E7F-D386860FF061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25DCC8BD-D079-40FB-80C9-4767C1159203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25DCC8BD-D079-40FB-80C9-4767C1159203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25DCC8BD-D079-40FB-80C9-4767C1159203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25DCC8BD-D079-40FB-80C9-4767C1159203}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://media-center:9090/tfs/xfxjumpstart
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Snake\\Snake.vbproj
-		SccProjectName1 = Snake
-		SccLocalPath1 = Snake
 	EndGlobalSection
 EndGlobal
