@@ -143,6 +143,7 @@ Partial Module ModuleMain
         score = 0
         lastScore = -1
         lives = 3
+        reason=LooseReason.None 
 
         DisplayTitle()
         SaveNVRam()
@@ -383,10 +384,10 @@ Partial Module ModuleMain
                 DisplayLevel()
                 InitializeSnake()
 
-                moveDelay = currentLevel.MoveDelay - If(expertMode, 10, 0)
-                renderDelay = moveDelay
-
                 Do
+                    moveDelay = currentLevel.MoveDelay - If(expertMode, 10, 0) - snake.Count / 4
+                    renderDelay = moveDelay
+
                     Thread.Sleep(delay)
 
                     renderTimer += delay
@@ -428,11 +429,7 @@ Partial Module ModuleMain
 
                         If food IsNot Nothing Then
                             If food.Item.IntersectsWith(snake(0)) Then
-                                If Int((score + food.Level) / 100) > Int(score / 100) Then
-                                    lives += 1
-                                    RenderLivesAndLevel()
-                                End If
-                                score += food.Level
+                                AddScore(food.Level)
                                 For i As Integer = 0 To food.Level - 1
                                     If youAreWhatYouEat Then
                                         snake.Add(snake.Last().Clone(food.Item.Color))
@@ -467,7 +464,7 @@ Partial Module ModuleMain
                     End If
 
                     If foodItemTimer >= foodItemDelay Then
-                        foodItemTimer = Rnd.Next(0, foodItemDelay)
+                        foodItemTimer = rnd.Next(0, foodItemDelay)
 
                         If food Is Nothing Then
                             Do
@@ -534,6 +531,14 @@ Partial Module ModuleMain
         Loop
     End Sub
 
+    Private Sub AddScore(s As Integer)
+        If Int((score + s) / 100) > Int(score / 100) Then
+            lives += 1
+            RenderLivesAndLevel()
+        End If
+        score += s
+    End Sub
+
     Private Sub ApplyBonus(m As Integer)
         suspendRenderer = True
 
@@ -547,7 +552,7 @@ Partial Module ModuleMain
             End If
 
             If m > 0 Then
-                score += m
+                AddScore(m)
                 RenderScore(True)
             End If
         Next
