@@ -17,6 +17,7 @@ Partial Module ModuleMain
         Public Property LevelName As String
         Public Property LevelIndex As Integer
         Public Property ExpertMode As Boolean
+        Public Property Platform As String
 
         Public Sub New(name As String, score As Integer,
                        levelName As String, levelIndex As Integer,
@@ -29,6 +30,7 @@ Partial Module ModuleMain
             Me.LevelName = levelName
             Me.LevelIndex = levelIndex
             Me.ExpertMode = expertMode
+            Me.Platform = Runtime.Platform.ToString()
         End Sub
 
         Public Function ToXML() As XElement
@@ -38,6 +40,7 @@ Partial Module ModuleMain
                        <levelName><%= LevelName %></levelName>
                        <levelIndex><%= LevelIndex %></levelIndex>
                        <expertMode><%= ExpertMode %></expertMode>
+                       <platform><%= Platform %></platform>
                    </highScore>
         End Function
     End Class
@@ -93,6 +96,16 @@ Partial Module ModuleMain
 
         LoadNVRam()
 
+        If Console.WindowWidth < 94 OrElse Console.WindowHeight < 42 Then
+            Console.WriteLine()
+            Console.ForegroundColor = ConsoleColor.Red
+            Console.WriteLine("Unable to start Snake under these conditions...")
+            Console.ForegroundColor = ConsoleColor.White
+            Console.WriteLine("Please increase the size of your console/terminal window to at least 94 columns and 42 rows.")
+            Console.WriteLine($"Your current console/terminal window has a size of {Console.WindowWidth} columns ({If(Console.WindowWidth >= 94, "√", "×")}) and {Console.WindowHeight} rows ({If(Console.WindowHeight >= 42, "√", "×")}).")
+            Quit()
+        End If
+
         gameLoopThread = New Thread(AddressOf GameLoop)
         gameLoopThread.Start()
 
@@ -123,6 +136,7 @@ Partial Module ModuleMain
             Dim hsLevelName As String
             Dim hsLevelIndex As Integer
             Dim hsExpertMode As Boolean
+            Dim hsPlatform As String
 
             For Each hs In xml.<settings>.<highScores>.<highScore>
                 hsName = hs.<name>.Value
@@ -130,6 +144,7 @@ Partial Module ModuleMain
                 hsLevelName = hs.<levelName>.Value
                 Integer.TryParse(hs.<levelIndex>.Value, hsLevelIndex)
                 Boolean.TryParse(hs.<expertMode>.Value, hsExpertMode)
+                hsPlatform = If(hs.<platform>.Value Is Nothing, Runtime.Platform.ToString(), hs.<platform>.Value)
 
                 highScores.Add(New HighScore(hsName,
                                              hsScore,
@@ -212,8 +227,9 @@ Partial Module ModuleMain
         Dim ks As Integer = 1
         Do
             Dim opMsgs() As String = {"──────────────── Options ──────────────── ",
-                                     $"({If(youAreWhatYouEat, "√", "·")}) [Y]ou're Are What You Eat",
-                                     $"({If(expertMode, "√", "·")}) [E]xpert Mode            "}
+                                     $"({If(youAreWhatYouEat, "√", "·")}) [Y]ou're Are What You Eat".PadRight(30),
+                                     $"({If(expertMode, "√", "·")}) [E]xpert Mode".PadRight(30),
+                                     "    [ESC] to exit game".PadRight(30)}
 
             If opMsgs(0)(k) = "─" Then opMsgs(0) = opMsgs(0).Substring(0, k) + "∙" + opMsgs(0).Substring(k + 1)
             Select Case k
@@ -265,7 +281,8 @@ Partial Module ModuleMain
                                         New Integer() {0, 3, ConsoleColor.White},
                                         New Integer() {6, 7, ConsoleColor.Yellow},
                                         New Integer() {16, 14, ConsoleColor.DarkCyan},
-                                        New Integer() {30, 4, ConsoleColor.Gray}}
+                                        New Integer() {30, 4, ConsoleColor.Gray},
+                                        New Integer() {36, 99, ConsoleColor.DarkGray}}
 
         For Each hs In highScores.OrderByDescending(Function(k) k.Score)
             Console.CursorTop = y
@@ -276,7 +293,7 @@ Partial Module ModuleMain
                 Console.BackgroundColor = ConsoleColor.Black
             End If
 
-            Dim msg As String = $"{hs.Name}   {hs.Score.ToString("N0").PadLeft(7)}   {hs.LevelName.PadRight(14).Substring(0, 14)} {hs.LevelIndex.ToString().PadLeft(3)}"
+            Dim msg As String = $"{hs.Name}   {hs.Score.ToString("N0").PadLeft(7)}   {hs.LevelName.PadRight(14).Substring(0, 14)} {hs.LevelIndex.ToString().PadLeft(3)}  {hs.Platform}"
             Console.CursorLeft = (Console.WindowWidth - msg.Length) / 2
             For x As Integer = 0 To msg.Length - 1
                 For k As Integer = 0 To colors.Length - 1
@@ -745,14 +762,15 @@ Partial Module ModuleMain
         Console.ForegroundColor = ConsoleColor.White
 
         AnimateBonuses()
-        RenderFoodItemTimer()
+        DisplayFoodItemTimer()
         RenderScore()
         RenderLivesAndLevel()
     End Sub
 
-    Private Sub RenderFoodItemTimer()
+    Private Sub DisplayFoodItemTimer()
         If food IsNot Nothing Then
             Console.SetCursorPosition(3, Console.WindowHeight - 1)
+            Console.BackgroundColor = If(food.Level <= 5, ConsoleColor.Gray, ConsoleColor.DarkGray)
             Console.ForegroundColor = food.Item.Color
             Console.Write(" +{0}: {1:N0} ", food.Level, (foodItemLifeSpan - (TimeSpan.FromTicks(Now.Ticks) - food.CreatedOn)).TotalSeconds)
         ElseIf showingTimer Then
