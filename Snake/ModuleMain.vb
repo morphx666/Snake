@@ -208,9 +208,14 @@ Partial Module ModuleMain
 
     Private Sub DisplayTitle()
         Console.Clear()
+
+        Dim wh As Size = tr.MeassureText(Console.Title)
+
+        Console.SetCursorPosition((Console.WindowWidth - 29) / 2 - (wh.Width + 2), 1)
+        AsciiSnake.Render()
+
         RenderBanner(Console.Title, ConsoleColor.DarkCyan, ConsoleColor.Black,
                      True, False, 0, 0,, 9)
-        Dim wh As Size = tr.MeassureText(Console.Title)
 
         Dim DrawCentered = Sub(y As Integer, msg As String, c As ConsoleColor)
                                Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, y)
