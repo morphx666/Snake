@@ -61,6 +61,10 @@ Partial Module ModuleMain
     Private levelFoodItemsCount As Integer
     Private reason As LooseReason = LooseReason.None
 
+    Private defaultFont As String
+    Private originalForeColor As ConsoleColor
+    Private originalBackColor As ConsoleColor
+
     Private foodItemLifeSpan As TimeSpan
     Private showingTimer As Boolean
     Private expertMode As Boolean
@@ -70,9 +74,20 @@ Partial Module ModuleMain
 
     Private rnd As New Random()
 
-    Private tr As New TextRenderer()
+    Private tr As TextRenderer
 
     Sub Main()
+        Console.WriteLine("Starting Snake...")
+
+        originalForeColor = Console.ForegroundColor
+        originalBackColor = Console.BackgroundColor
+        Select Case Runtime.Platform
+            Case Runtime.Platforms.Windows : defaultFont = "Consolas"
+            Case Runtime.Platforms.Mac : defaultFont = "Andale Mono"
+            Case Else : defaultFont = "Monospace Regular"
+        End Select
+        tr = New TextRenderer(defaultFont)
+
         Console.CursorVisible = False
         Win32Native.MaximizeConsoleWindow()
 
@@ -137,13 +152,12 @@ Partial Module ModuleMain
 
         Console.BackgroundColor = ConsoleColor.Black
         Console.ForegroundColor = ConsoleColor.Gray
-        Console.Clear()
         Console.Title = "SNAKE"
 
         score = 0
         lastScore = -1
         lives = 3
-        reason=LooseReason.None 
+        reason = LooseReason.None
 
         DisplayTitle()
         SaveNVRam()
@@ -220,7 +234,7 @@ Partial Module ModuleMain
 
             If Console.KeyAvailable Then
                 Select Case Console.ReadKey(True).Key
-                    Case ConsoleKey.Escape : Environment.Exit(0)
+                    Case ConsoleKey.Escape : Quit()
                     Case ConsoleKey.Enter : Exit Do
                     Case ConsoleKey.Y : youAreWhatYouEat = Not youAreWhatYouEat
                     Case ConsoleKey.E : expertMode = Not expertMode
@@ -231,6 +245,17 @@ Partial Module ModuleMain
         Loop
 
         Console.Clear()
+    End Sub
+
+    Private Sub Quit()
+        SaveNVRam()
+
+        Console.Clear()
+        Console.ForegroundColor = originalForeColor
+        Console.BackgroundColor = originalBackColor
+        Console.CursorVisible = True
+
+        Environment.Exit(0)
     End Sub
 
     Private Sub DisplayHighScores(y)
@@ -276,7 +301,7 @@ Partial Module ModuleMain
         msg = "Press any key to restart"
         Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, (Console.WindowHeight - wh.Height) / 2 + wh.Height + 4)
         Console.WriteLine(msg)
-        If Console.ReadKey(True).Key = ConsoleKey.Escape Then Environment.Exit(0)
+        If Console.ReadKey(True).Key = ConsoleKey.Escape Then Quit()
         Console.Clear()
         RenderBorder()
     End Sub
@@ -333,10 +358,12 @@ Partial Module ModuleMain
     Private Function RenderBanner(msg As String, foreColor As ConsoleColor, backColor As ConsoleColor,
                              centerX As Boolean, centerY As Boolean,
                              Optional x As Integer = 0, Optional y As Integer = 0,
-                             Optional fontFamily As String = "Consolas",
+                             Optional fontFamily As String = "",
                              Optional fontSize As Integer = 8,
                              Optional kerning As Double = 0.6,
                              Optional animate As Boolean = True) As Size
+
+        If fontFamily = "" Then fontFamily = defaultFont
         Dim wh As Size = tr.MeassureText(msg, fontFamily, fontSize, kerning)
 
         x = If(centerX, (Console.WindowWidth - wh.Width) \ 2 + x, x)
@@ -732,7 +759,7 @@ Partial Module ModuleMain
             showingTimer = False
             Console.SetCursorPosition(3, Console.WindowHeight - 1)
             Console.ForegroundColor = ConsoleColor.White
-            Console.Write("████████")
+            Console.Write("█████████")
         End If
     End Sub
 

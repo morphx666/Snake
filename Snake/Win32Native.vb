@@ -41,7 +41,9 @@ Public Class Win32Native
     End Sub
 
     Public Shared Sub MaximizeConsoleWindow()
-        Dim p As Process = Process.GetCurrentProcess()
-        ShowWindow(p.MainWindowHandle, SW_MAXIMIZE)
+        If Runtime.Platform = Runtime.Platforms.Windows Then
+            Dim p As Process = Process.GetCurrentProcess()
+            ShowWindow(p.MainWindowHandle, SW_MAXIMIZE)
+        End If
     End Sub
 End Class

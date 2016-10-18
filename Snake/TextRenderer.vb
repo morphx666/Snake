@@ -52,15 +52,24 @@ Public Class TextRenderer
         End Function
     End Class
 
+    Private mDefaultFont As String
     Private alphabet As New Dictionary(Of CharType, String)
 
-    Public Sub New()
+    Public Sub New(Optional defaultFont As String = "Consolas")
+        mDefaultFont = defaultFont
     End Sub
 
+    Public ReadOnly Property DefaultFont As String
+        Get
+            Return mDefaultFont
+        End Get
+    End Property
+
     Public Function MeassureText(value As String,
-                                 Optional fontFamily As String = "Consolas",
+                                 Optional fontFamily As String = "",
                                  Optional fontSize As Single = 8,
                                  Optional kerning As Double = 0.6) As Size
+        If fontFamily = "" Then fontFamily = mDefaultFont
         CreateBitmaps(value(0), fontFamily, fontSize)
         Dim ct As New CharType(value(0), fontFamily, fontSize)
 
@@ -68,10 +77,11 @@ Public Class TextRenderer
     End Function
 
     Public Sub Write(value As String, x As Integer, y As Integer, fc As ConsoleColor,
-                     Optional fontFamily As String = "Consolas",
+                     Optional fontFamily As String = "",
                      Optional fontSize As Single = 8,
                      Optional f As String = "█",
                      Optional kerning As Double = 0.6)
+        If fontFamily = "" Then fontFamily = mDefaultFont
         CreateBitmaps(value, fontFamily, fontSize)
         Console.ForegroundColor = fc
         Try
