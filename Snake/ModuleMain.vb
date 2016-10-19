@@ -361,7 +361,7 @@ Partial Module ModuleMain
                      ConsoleColor.White, ConsoleColor.DarkGreen,
                      True, False, , Console.WindowHeight - wh2.Height + 1, , 6, 0.7)
 
-        RenderLivesAndLevel()
+        DisplayLivesAndLevel()
         For i As Integer = 1 To 3
             RenderBanner((4 - i).ToString(), ConsoleColor.Red, ConsoleColor.Black,
                          True, True,, 1,, 7)
@@ -372,7 +372,7 @@ Partial Module ModuleMain
 
         Console.Clear()
         RenderBorder()
-        RenderScore(True)
+        DisplayScore(True)
         RenderLevelMaze()
         ConsumeKeystrokes()
     End Sub
@@ -565,7 +565,7 @@ Partial Module ModuleMain
 
                 lives -= 1
                 If lives = 0 Then
-                    RenderLivesAndLevel()
+                    DisplayLivesAndLevel()
                     Exit Do
                 End If
             Loop
@@ -583,7 +583,7 @@ Partial Module ModuleMain
     Private Sub AddScore(s As Integer)
         If Int((score + s) / 100) > Int(score / 100) Then
             lives += 1
-            RenderLivesAndLevel()
+            DisplayLivesAndLevel()
         End If
         score += s
     End Sub
@@ -602,7 +602,7 @@ Partial Module ModuleMain
 
             If m > 0 Then
                 AddScore(m)
-                RenderScore(True)
+                DisplayScore(True)
             End If
         Next
 
@@ -768,8 +768,8 @@ Partial Module ModuleMain
 
         AnimateBonuses()
         DisplayFoodItemTimer()
-        RenderScore()
-        RenderLivesAndLevel()
+        DisplayScore()
+        DisplayLivesAndLevel()
     End Sub
 
     Private Sub DisplayFoodItemTimer()
@@ -810,7 +810,7 @@ Partial Module ModuleMain
         Loop Until exitDo
     End Sub
 
-    Private Sub RenderScore(Optional force As Boolean = False)
+    Private Sub DisplayScore(Optional force As Boolean = False)
         If lastScore <> score OrElse force Then
             Console.ForegroundColor = ConsoleColor.White
             Console.SetCursorPosition(Console.WindowWidth - 8, 0)
@@ -819,7 +819,8 @@ Partial Module ModuleMain
         End If
     End Sub
 
-    Private Sub RenderLivesAndLevel()
+    Private Sub DisplayLivesAndLevel()
+        Console.BackgroundColor = ConsoleColor.Black
         Console.ForegroundColor = If(expertMode, ConsoleColor.White, ConsoleColor.Gray)
         Console.SetCursorPosition(Console.WindowWidth - 8 - lives - 5, Console.WindowHeight - 1)
         Console.Write($" {StrDup(lives, "▌")} | {currentLevel.Index} | {currentLevel.FoodItemsCount - foodItemsCount} ")
