@@ -6,8 +6,10 @@
     Public ReadOnly Property Maze As Boolean()
     Public ReadOnly Property FoodItem As Char
 
-    Public Sub New(index As Integer, name As String,
-                   foodItemsCount As Integer, moveDelay As Integer,
+    Public Sub New(index As Integer,
+                   name As String,
+                   foodItemsCount As Integer,
+                   moveDelay As Integer,
                    maze() As Boolean,
                    Optional foodItem As Char = "█")
         Me.Index = index
