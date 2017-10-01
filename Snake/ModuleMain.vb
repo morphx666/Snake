@@ -145,8 +145,7 @@ Partial Module ModuleMain
                 hsLevelName = hs.<levelName>.Value
                 Integer.TryParse(hs.<levelIndex>.Value, hsLevelIndex)
                 Boolean.TryParse(hs.<expertMode>.Value, hsExpertMode)
-                hsPlatform = If(hs.<platform>.Value Is Nothing, Runtime.Platform.ToString(), hs.<platform>.Value)
-
+                hsPlatform = If(hs.<platform>.Value, Runtime.Platform.ToString())
                 highScores.Add(New HighScore(hsName,
                                              hsScore,
                                              hsLevelName,

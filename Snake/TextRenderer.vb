@@ -73,7 +73,9 @@ Public Class TextRenderer
         CreateBitmaps(value(0), fontFamily, fontSize)
         Dim ct As New CharType(value(0), fontFamily, fontSize)
 
-        Return New Size(ct.CharSize.Width * kerning * value.Length, ct.CharSize.Height)
+        ' Apparently, this formula no longer works on Windows 10.
+        ' The +0.6 adjust it for the Consolas' Windows 10 font.
+        Return New Size(ct.CharSize.Width * kerning * (value.Length + 0.6), ct.CharSize.Height)
     End Function
 
     Public Sub Write(value As String, x As Integer, y As Integer, fc As ConsoleColor,
