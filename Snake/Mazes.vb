@@ -92,7 +92,7 @@
     Private Shared Sub DrawLine(b() As Boolean, v As Boolean, x1 As Integer, y1 As Integer, x2 As Integer, y2 As Integer)
         Dim dx As Integer = x2 - x1
         Dim dy As Integer = y2 - y1
-        Dim l As Integer = Math.Sqrt(dx ^ 2 + dy ^ 2)
+        Dim l As Integer = Math.Sqrt(dx * dx + dy * dy)
         Dim a As Double = Math.Atan2(dy, dx)
         For r As Integer = 0 To l
             SetPixel(b, v, x1 + r * Math.Cos(-a), y1 + r * Math.Sin(a))

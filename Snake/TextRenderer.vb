@@ -126,7 +126,7 @@ Public Class TextRenderer
                             g.Clear(Color.Black)
                             g.DrawString(c, f, b, p)
 
-                            'bmp.Save("C:\Users\Xavier\Desktop\tmp.png", ImageFormat.Png)
+                            'bmp.Save("d:\Users\Xavier\Desktop\tmp.png", ImageFormat.Png)
 
                             Dim sourceData = bmp.LockBits(r, ImageLockMode.ReadOnly, bmp.PixelFormat)
                             Dim sourcePointer = sourceData.Scan0

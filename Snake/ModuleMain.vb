@@ -91,7 +91,6 @@ Partial Module ModuleMain
         End Select
         tr = New TextRenderer(defaultFont)
 
-        Console.CursorVisible = False
         Win32Native.MaximizeConsoleWindow()
 
         LoadNVRam()
@@ -108,6 +107,8 @@ Partial Module ModuleMain
 
         gameLoopThread = New Thread(AddressOf GameLoop)
         gameLoopThread.Start()
+
+        Console.CursorVisible = False
 
         Do
             Thread.Sleep(100)
