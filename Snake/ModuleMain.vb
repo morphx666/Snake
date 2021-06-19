@@ -102,6 +102,7 @@ Partial Module ModuleMain
             Console.ForegroundColor = ConsoleColor.White
             Console.WriteLine("Please increase the size of your console/terminal window to at least 94 columns and 42 rows.")
             Console.WriteLine($"Your current console/terminal window has a size of {Console.WindowWidth} columns ({If(Console.WindowWidth >= 94, "√", "×")}) and {Console.WindowHeight} rows ({If(Console.WindowHeight >= 42, "√", "×")}).")
+            Console.ReadKey()
             Quit()
         End If
 

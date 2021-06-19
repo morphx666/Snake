@@ -118,7 +118,7 @@ Public Class TextRenderer
                 charSize.Width -= 1
                 charSize.Height -= 1
 
-                Using bmp As New Bitmap(charSize.Width, charSize.Height, PixelFormat.Format16bppRgb555)
+                Using bmp As New Bitmap(charSize.Width, charSize.Height, PixelFormat.Format32bppArgb)
                     Dim r As New Rectangle(0, 0, bmp.Width, bmp.Height)
                     Using g As Graphics = Graphics.FromImage(bmp)
                         For i As Integer = 0 To value.Length - 1
